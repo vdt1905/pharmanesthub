@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import API_BASE_URL from '../config/api';
 import { useNavigate, Link } from 'react-router-dom';
 import React from 'react';
 
@@ -36,7 +35,7 @@ const Profile = () => {
             // However, to keep it simple and consistent with our backend "source of truth",
             // we will call our backend API.
 
-            await axios.put(`${API_BASE_URL}/api/auth/profile`,
+            await axios.put('http://localhost:5000/api/auth/profile',
                 { displayName, photoURL },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

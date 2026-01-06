@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import API_BASE_URL from '../config/api';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { auth } from '../firebase';
 import React from 'react';
 const Dashboard = () => {
@@ -19,7 +18,7 @@ const Dashboard = () => {
         if (!currentUser) return;
         try {
             const token = await currentUser.getIdToken();
-            const res = await axios.get(`${API_BASE_URL}/api/groups`, {
+            const res = await axios.get('http://localhost:5000/api/groups', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGroups(res.data);
@@ -34,8 +33,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const token = await currentUser.getIdToken();
-            await axios.post(`${API_BASE_URL}/api/groups/create`,
-                { name: newGroupName },
+            await axios.post('http://localhost:5000/api/groups/create',
+                { name: newGroupName, description: 'Secure Group' },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setNewGroupName('');

@@ -8,19 +8,11 @@ dotenv.config();
 const app = express();
 
 // Middleware
-const corsOptions = {
-    origin: [
-        "https://pdf-secure-r528-frontend-last.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:5000"
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
+app.use(cors({
+    origin: ["https://pdf-secure-r528-frontend-last.vercel.app", "http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(
     helmet({
         crossOriginResourcePolicy: false,
@@ -60,10 +52,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

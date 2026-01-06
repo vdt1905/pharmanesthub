@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import API_BASE_URL from '../config/api';
 import React from 'react';
 
 const GroupView = () => {
@@ -59,7 +58,7 @@ const GroupView = () => {
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
             // Fetch Group Details
-            const groupRes = await axios.get(`${API_BASE_URL}/api/groups/${groupId}`, config);
+            const groupRes = await axios.get(`http://localhost:5000/api/groups/${groupId}`, config);
             setGroup(groupRes.data);
 
             // Check Admin Status
@@ -78,7 +77,7 @@ const GroupView = () => {
             }
 
             // Fetch PDFs
-            const pdfRes = await axios.get(`${API_BASE_URL}/api/pdfs/${groupId}`, config);
+            const pdfRes = await axios.get(`http://localhost:5000/api/pdfs/${groupId}`, config);
             setPdfs(pdfRes.data);
         } catch (error) {
             console.error('Error fetching data', error);
@@ -88,7 +87,7 @@ const GroupView = () => {
     const fetchMembers = async () => {
         try {
             const token = await currentUser.getIdToken();
-            const res = await axios.get(`${API_BASE_URL}/api/groups/${groupId}/members`, {
+            const res = await axios.get(`http://localhost:5000/api/groups/${groupId}/members`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMembers(res.data);
@@ -103,7 +102,7 @@ const GroupView = () => {
         setRemovingMember(memberId);
         try {
             const token = await currentUser.getIdToken();
-            await axios.delete(`${API_BASE_URL}/api/groups/${groupId}/members/${memberId}`, {
+            await axios.delete(`http://localhost:5000/api/groups/${groupId}/members/${memberId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // Refresh members list
@@ -119,8 +118,8 @@ const GroupView = () => {
     const generateInvite = async () => {
         try {
             const token = await currentUser.getIdToken();
-            const res = await axios.post(`${API_BASE_URL}/api/groups/${groupId}/invite`,
-                { duration: inviteDuration },
+            const res = await axios.post(`http://localhost:5000/api/groups/${groupId}/invite`,
+                { durationDays: inviteDuration },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             console.log('Invite Gen Response:', res.data);
@@ -144,7 +143,7 @@ const GroupView = () => {
 
         try {
             const token = await currentUser.getIdToken();
-            await axios.post(`${API_BASE_URL}/api/pdfs/upload`, formData, {
+            await axios.post('http://localhost:5000/api/pdfs/upload', formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'

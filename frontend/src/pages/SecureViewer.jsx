@@ -4,7 +4,6 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import React from 'react';
-import API_BASE_URL from '../config/api';
 
 // Components
 import Watermark from '../components/Watermark';
@@ -14,11 +13,11 @@ import SecurityOverlay from '../components/SecurityOverlay';
 import { useSecurityLayers } from '../hooks/useSecurityLayers';
 
 // Set worker source locally to avoid CDN/CORS issues
-// Configure worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 // API Base URL
-const API_BASE = API_BASE_URL;
+const API_BASE = 'http://localhost:5000';
 
 /**
  * SecureViewer Component

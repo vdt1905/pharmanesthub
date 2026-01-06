@@ -203,7 +203,10 @@ exports.joinGroup = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // Get all members of a group with their details
+=======
+>>>>>>> 346f2acb384a3d409b54d75d527c9188a3eca5c9
 exports.getGroupMembers = async (req, res) => {
     try {
         const { groupId } = req.params;
@@ -242,21 +245,67 @@ exports.getGroupMembers = async (req, res) => {
 
         res.status(200).json(memberDetails);
 
+        console.log(`Fetching members for group ${groupId} by user ${uid}`);
+
+        const groupDoc = await db.collection('groups').doc(groupId).get();
+        if (!groupDoc.exists) return res.status(404).json({ message: 'Group not found' });
+
+        const groupData = groupDoc.data();
+
+        // Check if requester is a member
+        if (!groupData.members || !groupData.members.includes(uid)) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const members = [];
+        // Fetch user details for each member
+        // Ideally, for large groups, we should page this or store denormalized data.
+        // For now, fetching each user document parallelly.
+        const memberPromises = groupData.members.map(memberId =>
+            db.collection('users').doc(memberId).get()
+        );
+
+        const memberDocs = await Promise.all(memberPromises);
+
+        memberDocs.forEach(doc => {
+            if (doc.exists) {
+                const userData = doc.data();
+                members.push({
+                    uid: doc.id,
+                    name: userData.name || 'Unknown',
+                    email: userData.email,
+                    picture: userData.picture || '',
+                    role: groupData.roles ? groupData.roles[doc.id] : 'member',
+                    expiry: groupData.memberExpiry ? groupData.memberExpiry[doc.id] : null
+                });
+            }
+        });
+
+        res.status(200).json(members);
+>>>>>>> 346f2acb384a3d409b54d75d527c9188a3eca5c9
     } catch (error) {
         console.error('Get Group Members Error:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
+<<<<<<< HEAD
 // Remove a member from the group (admin only)
 exports.removeMember = async (req, res) => {
     try {
         const { groupId, memberId } = req.params;
         const { uid } = req.user;
+=======
+exports.removeMember = async (req, res) => {
+    try {
+        const { groupId, userId } = req.params;
+        const { uid } = req.user; // Requester
+>>>>>>> 346f2acb384a3d409b54d75d527c9188a3eca5c9
 
         const groupRef = db.collection('groups').doc(groupId);
         const groupDoc = await groupRef.get();
 
+<<<<<<< HEAD
         if (!groupDoc.exists) {
             return res.status(404).json({ message: 'Group not found' });
         }
@@ -297,8 +346,38 @@ exports.removeMember = async (req, res) => {
         await groupRef.update(updateData);
 
         res.status(200).json({ message: 'Member removed successfully' });
+=======
+        if (!groupDoc.exists) return res.status(404).json({ message: 'Group not found' });
+
+        const groupData = groupDoc.data();
+
+        // Authorization Check
+        // Requester must be owner or admin
+        const requesterRole = groupData.roles ? groupData.roles[uid] : null;
+        const isOwner = groupData.createdBy === uid;
+
+        if (!isOwner && requesterRole !== 'owner' && requesterRole !== 'admin') {
+            return res.status(403).json({ message: 'Only admins can remove members' });
+        }
+
+        // Prevent removing the owner
+        if (groupData.createdBy === userId || (groupData.roles && groupData.roles[userId] === 'owner')) {
+            return res.status(400).json({ message: 'Cannot remove the group owner' });
+        }
+
+        // Implementation
+        await groupRef.update({
+            members: admin.firestore.FieldValue.arrayRemove(userId),
+            [`roles.${userId}`]: admin.firestore.FieldValue.delete(),
+            [`memberExpiry.${userId}`]: admin.firestore.FieldValue.delete()
+        });
+
+        res.status(200).json({ message: 'Member removed successfully' });
+
+>>>>>>> 346f2acb384a3d409b54d75d527c9188a3eca5c9
     } catch (error) {
         console.error('Remove Member Error:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
