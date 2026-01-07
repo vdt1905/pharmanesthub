@@ -8,12 +8,20 @@ if (!admin.apps.length) {
     try {
         let credential;
         if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-            // Load from Environment Variable (Secure)
+            // Option 1: Full JSON in one env var
             const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
             credential = admin.credential.cert(serviceAccount);
+        } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+            // Option 2: Individual env vars
+            credential = admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                // Replace escaped newlines if necessary
+                privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+            });
         } else {
-            // Fallback to local file (Legacy/Dev)
-            console.warn('FIREBASE_SERVICE_ACCOUNT not set. Attempting to load from file...');
+            // Option 3: Fallback to local file (Legacy/Dev)
+            console.warn('FIREBASE_SERVICE_ACCOUNT or individual keys not set. Attempting to load from file...');
             const serviceAccount = require('./serviceAccountKey.json');
             credential = admin.credential.cert(serviceAccount);
         }

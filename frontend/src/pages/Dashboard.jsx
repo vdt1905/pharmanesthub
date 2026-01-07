@@ -18,7 +18,7 @@ const Dashboard = () => {
         if (!currentUser) return;
         try {
             const token = await currentUser.getIdToken();
-            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/groups`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/groups`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGroups(res.data);
@@ -33,7 +33,7 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const token = await currentUser.getIdToken();
-            await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/groups/create`,
+            await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/groups/create`,
                 { name: newGroupName, description: 'Secure Group' },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

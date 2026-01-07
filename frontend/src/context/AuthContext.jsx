@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
                 // Sync user with backend
                 try {
                     const token = await user.getIdToken();
-                    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/sync`, {}, {
+                    await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/sync`, {}, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                 } catch (error) {

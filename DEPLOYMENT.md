@@ -8,7 +8,15 @@
 You need to set up the following environment variables in your Vercel project settings.
 
 ### Backend Project
-- `FIREBASE_SERVICE_ACCOUNT`: Copy the **entire content** of `backend/config/serviceAccountKey.json` and paste it as the value. Remove any newlines if copying manually, but Vercel handles multiline values well in the UI.
+**Option 1 (Recommended for simplicity):**
+- `FIREBASE_SERVICE_ACCOUNT`: Copy the **entire content** of `backend/config/serviceAccountKey.json` and paste it as the value.
+
+**Option 2 (Individual Keys -- good if copy-paste issues occur):**
+- `FIREBASE_PROJECT_ID`: value of `project_id` from json
+- `FIREBASE_CLIENT_EMAIL`: value of `client_email` from json
+- `FIREBASE_PRIVATE_KEY`: value of `private_key` from json (copy the whole string including `-----BEGIN PRIVATE KEY...`)
+
+**Other Required Vars:**
 - `CLOUDINARY_CLOUD_NAME`: Your Cloudinary Cloud Name
 - `CLOUDINARY_API_KEY`: Your Cloudinary API Key
 - `CLOUDINARY_API_SECRET`: Your Cloudinary API Secret
