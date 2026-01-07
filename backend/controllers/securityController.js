@@ -348,7 +348,7 @@ async function checkAnomalies(userId, event) {
                 .where('userId', '==', userId)
                 .where('type', 'in', ['PRINTSCREEN_BLOCKED', 'KEYBOARD_BLOCKED'])
                 .get();
-            
+
             let attemptCount = 0;
             attemptsQuery.forEach(doc => {
                 const d = doc.data();
@@ -357,18 +357,18 @@ async function checkAnomalies(userId, event) {
             });
 
             console.log(`[SECURITY] User ${userId} Screenshot Attempts: ${attemptCount}`);
-            
+
             // 2. Fetch User Data
             const userRef = db.collection('users').doc(userId);
             const userSnap = await userRef.get();
-            
+
             if (userSnap.exists) {
                 const userData = userSnap.data();
 
                 // 3. CHECK FOR BAN (>= 20)
                 if (attemptCount >= BAN_THRESHOLD && !userData.disabled) {
                     console.warn(`[BAN] User ${userId} banned for ${attemptCount} screenshot attempts.`);
-                    
+
                     // Ban and record reason
                     await userRef.set({
                         disabled: true,
@@ -400,22 +400,22 @@ async function checkAnomalies(userId, event) {
                          <p>Reason: ${attemptCount} screenshot/capture attempts.</p>
                          <p>Action Required: Review user activity.</p>`
                     );
-                } 
+                }
                 // 4. CHECK FOR WARNING (>= 10)
                 else if (attemptCount >= WARN_THRESHOLD && !userData.disabled) {
                     // Only warn if we haven't warned for this threshold yet (avoid spam)
                     const lastWarnCount = userData.lastScreenshotWarnCount || 0;
-                    
+
                     if (lastWarnCount < WARN_THRESHOLD) {
-                         console.warn(`[WARN] User ${userId} warned for ${attemptCount} screenshot attempts.`);
+                        console.warn(`[WARN] User ${userId} warned for ${attemptCount} screenshot attempts.`);
 
-                         // Update warning flag
-                         await userRef.set({
-                             lastScreenshotWarnCount: attemptCount
-                         }, { merge: true });
+                        // Update warning flag
+                        await userRef.set({
+                            lastScreenshotWarnCount: attemptCount
+                        }, { merge: true });
 
-                         // Send Warning Email
-                         await sendSecurityEmail(
+                        // Send Warning Email
+                        await sendSecurityEmail(
                             userData.email || event.userEmail,
                             'Security Warning - Prohibited Action Detected',
                             `<h3>Security Warning</h3>
