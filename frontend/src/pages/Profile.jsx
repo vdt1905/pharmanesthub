@@ -35,7 +35,7 @@ const Profile = () => {
             // However, to keep it simple and consistent with our backend "source of truth",
             // we will call our backend API.
 
-            await axios.put('http://localhost:5000/api/auth/profile',
+            await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/auth/profile`,
                 { displayName, photoURL },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

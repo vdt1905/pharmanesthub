@@ -15,7 +15,7 @@ const JoinGroup = () => {
             if (!currentUser) return; // Wait for auth
             try {
                 const token = await currentUser.getIdToken();
-                const res = await axios.post('http://localhost:5000/api/groups/join',
+                const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/groups/join`,
                     { inviteCode },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
