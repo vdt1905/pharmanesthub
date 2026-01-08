@@ -13,6 +13,7 @@ app.use((req, res, next) => {
         "https://secure-pdf-viewer-frontend.vercel.app",
         "https://pdf-secure-r528-frontend-last.vercel.app",
         "https://pharmanesthub.vercel.app",
+        "https://pharmanesthub.in",
         "http://localhost:5173"
     ];
 
