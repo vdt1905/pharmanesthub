@@ -7,6 +7,7 @@ import GroupView from './pages/GroupView';
 import JoinGroup from './pages/JoinGroup';
 import Profile from './pages/Profile';
 import SecureViewer from './pages/SecureViewer';
+import Help from './pages/Help';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -56,6 +57,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <JoinGroup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <ProtectedRoute>
+                <Help />
               </ProtectedRoute>
             }
           />

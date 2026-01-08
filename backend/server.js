@@ -84,6 +84,11 @@ app.use((err, req, res, next) => {
 });
 
 /* =====================================================
-   6️⃣ Export for Vercel (NO app.listen)
+   6️⃣ Export for Vercel & Local Start
    ===================================================== */
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
 module.exports = app;

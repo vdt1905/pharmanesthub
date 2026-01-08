@@ -13,7 +13,7 @@ function makeInviteCode(len = 8) {
 
 exports.createGroup = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, year } = req.body;
     const { uid } = req.user;
 
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -26,6 +26,7 @@ exports.createGroup = async (req, res) => {
       id: groupId,
       name: name.trim(),
       description: description ? String(description).trim() : "",
+      year: year ? String(year).trim() : "",
       createdBy: uid,
 
       // roles map for scalability
@@ -255,8 +256,8 @@ exports.getGroupMembers = async (req, res) => {
         role: groupData.roles
           ? groupData.roles[memberId]
           : groupData.createdBy === memberId
-          ? "owner"
-          : "member",
+            ? "owner"
+            : "member",
         expiryDate: groupData.memberExpiry ? groupData.memberExpiry[memberId] : null,
       });
     }
@@ -318,6 +319,28 @@ exports.removeMember = async (req, res) => {
     res.status(200).json({ message: "Member removed successfully" });
   } catch (error) {
     console.error("Remove Member Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { email } = req.user;
+
+    // Admin check
+    if (email !== "tandelvansh0511@gmail.com") {
+      return res.status(403).json({ message: "Only the administrator can delete groups." });
+    }
+
+    await db.collection("groups").doc(groupId).delete();
+
+    // Optionally delete related invites or sub-collections here if needed
+    // For now, just deleting the group document
+
+    res.status(200).json({ message: "Group deleted successfully" });
+  } catch (error) {
+    console.error("Delete Group Error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

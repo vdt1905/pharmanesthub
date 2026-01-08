@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import React from 'react';
+import logo from '../assets/logo.jpg';
 
 const GroupView = () => {
     const { groupId } = useParams();
+    const navigate = useNavigate();
     const [pdfs, setPdfs] = useState([]);
     const [group, setGroup] = useState(null);
     const [inviteLink, setInviteLink] = useState('');
@@ -93,6 +95,22 @@ const GroupView = () => {
             setMembers(res.data);
         } catch (error) {
             console.error('Error fetching members', error);
+        }
+    };
+
+    const deleteGroup = async () => {
+        if (!window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) return;
+
+        try {
+            const token = await currentUser.getIdToken();
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/groups/${groupId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('Group deleted successfully');
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Error deleting group:', error);
+            alert('Failed to delete group');
         }
     };
 
@@ -187,9 +205,7 @@ const GroupView = () => {
                             </Link>
                             <div className="h-8 w-px bg-slate-200/60 hidden md:block"></div>
                             <div className="flex items-center gap-3 overflow-hidden">
-                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-500/20 shrink-0">
-                                    {group?.name?.charAt(0).toUpperCase() || 'G'}
-                                </div>
+                                <img src={logo} alt="Logo" className="w-12 h-12 rounded-xl object-cover shadow-lg shadow-indigo-500/20 shrink-0" />
                                 <div className="min-w-0">
                                     <h1 className="text-lg font-bold text-slate-900 leading-tight truncate">
                                         {group?.name || 'Loading...'}
@@ -249,6 +265,18 @@ const GroupView = () => {
                                     </button>
                                 </>
                             )}
+
+                            {/* Delete Group Button (Admin Only) */}
+                            {currentUser?.email === 'tandelvansh0511@gmail.com' && (
+                                <button
+                                    onClick={deleteGroup}
+                                    className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-sm font-bold rounded-xl transition-all border border-red-100 flex items-center gap-2"
+                                    title="Delete Group"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <span className="hidden sm:inline">Delete</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -295,6 +323,14 @@ const GroupView = () => {
                             <p className="text-slate-600 leading-relaxed font-medium">
                                 {group?.description || 'No description available for this group.'}
                             </p>
+
+                            {group?.year && (
+                                <div className="mt-4 flex items-center gap-2">
+                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                        {group.year}
+                                    </span>
+                                </div>
+                            )}
 
                             {/* Membership Countdown */}
                             {expiry && !isAdmin && (

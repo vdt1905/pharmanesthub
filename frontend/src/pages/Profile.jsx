@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import React from 'react';
 
 const Profile = () => {
     const { currentUser } = useAuth();
