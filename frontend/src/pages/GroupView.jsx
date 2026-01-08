@@ -253,7 +253,7 @@ const GroupView = () => {
                             </div>
                         )}
 
-                        {currentUser?.email === 'tandelvansh0511@gmail.com' && (
+                        {currentUser?.email === '@pharmanesthubgmail.com' && (
                             <button
                                 onClick={deleteGroup}
                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"

@@ -329,7 +329,7 @@ exports.deleteGroup = async (req, res) => {
     const { email } = req.user;
 
     // Admin check
-    if (email !== "tandelvansh0511@gmail.com") {
+    if (email !== "@pharmanesthubgmail.com") {
       return res.status(403).json({ message: "Only the administrator can delete groups." });
     }
 
