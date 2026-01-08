@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { auth } from '../firebase';
 import React from 'react';
 import logo from '../assets/logo.jpg';
+import ThemeToggle from '../components/ThemeToggle';
 const Dashboard = () => {
     const [groups, setGroups] = useState([]);
     const [newGroupName, setNewGroupName] = useState('');
@@ -91,69 +92,74 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex relative">
+        <div className="min-h-screen bg-main flex relative text-primary font-sans selection:bg-indigo-500/30 transition-colors duration-300">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && window.innerWidth < 768 && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-30"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200 transition-all duration-300 flex flex-col
-                ${isSidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full md:translate-x-0 md:w-20'}
+                fixed inset-y-0 left-0 z-40 glass-panel border-r-0 transition-all duration-300 flex flex-col
+                ${isSidebarOpen ? 'w-72 translate-x-0' : '-translate-x-full md:translate-x-0 md:w-20'}
                 h-full
             `}>
-                <div className="h-16 flex items-center justify-center border-b border-slate-100">
+                <div className="h-20 flex items-center justify-center border-b border-white/5 mx-4 mb-2">
                     {isSidebarOpen ? (
-                        <div className="flex items-center gap-2">
-                            <img src={logo} alt="Logo" className="w-12 h-12 rounded-lg object-cover shadow-sm" />
-                            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-violet-600">PharmaNestHub</h1>
+                        <div className="flex items-center gap-3 animate-fade-in-down">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-indigo-500 blur-md opacity-40 rounded-full"></div>
+                                <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-lg relative z-10 border border-white/10" />
+                            </div>
+                            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 tracking-tight">PharmaNest</h1>
                         </div>
                     ) : (
-                        <img src={logo} alt="Logo" className="w-12 h-12 rounded-lg object-cover shadow-sm" />
+                        <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-lg border border-white/10" />
                     )}
                 </div>
 
-                <div className="flex-1 py-6 flex flex-col gap-2 px-2">
+                <div className="flex-1 py-6 flex flex-col gap-2 px-3">
                     <button
                         onClick={() => { setActiveView('groups'); if (window.innerWidth < 768) setIsSidebarOpen(false); }}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeView === 'groups' ? 'bg-indigo-50 text-indigo-600 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${activeView === 'groups' ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/20' : 'text-secondary hover:bg-white/5 hover:text-primary hover:translate-x-1'}`}
                         title="My Groups"
                     >
-                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        {isSidebarOpen && <span>My Groups</span>}
+                        <svg className={`w-5 h-5 shrink-0 transition-colors ${activeView === 'groups' ? 'text-indigo-400' : 'text-slate-500 group-hover:text-indigo-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        {isSidebarOpen && <span className="font-medium">My Groups</span>}
                     </button>
 
                     {/* Add Group (Admin Only) */}
                     {currentUser?.email === 'tandelvansh0511@gmail.com' && (
                         <button
                             onClick={() => { setActiveView('create_group'); if (window.innerWidth < 768) setIsSidebarOpen(false); }}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeView === 'create_group' ? 'bg-indigo-50 text-indigo-600 font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${activeView === 'create_group' ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/20' : 'text-secondary hover:bg-white/5 hover:text-primary hover:translate-x-1'}`}
                             title="Add Group"
                         >
-                            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                            {isSidebarOpen && <span>Add Group</span>}
+                            <svg className={`w-5 h-5 shrink-0 transition-colors ${activeView === 'create_group' ? 'text-indigo-400' : 'text-slate-500 group-hover:text-indigo-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                            {isSidebarOpen && <span className="font-medium">Add Group</span>}
                         </button>
                     )}
 
-                    <Link
-                        to="/help"
-                        onClick={() => { if (window.innerWidth < 768) setIsSidebarOpen(false); }}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all"
-                        title="Help & Doubts"
-                    >
-                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {isSidebarOpen && <span>Help & Doubts</span>}
-                    </Link>
+                    <div className="mt-auto">
+                        <Link
+                            to="/help"
+                            onClick={() => { if (window.innerWidth < 768) setIsSidebarOpen(false); }}
+                            className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-secondary hover:bg-white/5 hover:text-primary transition-all hover:translate-x-1 group"
+                            title="Help & Doubts"
+                        >
+                            <svg className="w-5 h-5 shrink-0 text-slate-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {isSidebarOpen && <span className="font-medium">Help & Support</span>}
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="p-4 border-t border-slate-100 hidden md:block">
+                <div className="p-4 border-t border-white/5 hidden md:block mx-2">
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="w-full flex items-center justify-center p-2 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                        className="w-full flex items-center justify-center p-2 rounded-lg text-slate-500 hover:bg-white/5 hover:text-indigo-400 transition-colors"
                         title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
                     >
                         {isSidebarOpen ? (
@@ -166,82 +172,94 @@ const Dashboard = () => {
             </aside>
 
             {/* Main Content Area */}
-            <main className={`flex-1 transition-all duration-300 w-full ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
+            <main className={`flex-1 transition-all duration-300 w-full ${isSidebarOpen ? 'md:ml-72' : 'md:ml-20'}`}>
                 {/* Header */}
-                <header className="bg-white/80 backdrop-blur-md shadow-sm h-16 sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between md:justify-end border-b border-gray-100">
+                <header className="glass-panel h-20 sticky top-0 z-30 px-6 md:px-10 flex items-center justify-between md:justify-end border-x-0 border-t-0 border-b border-white/5">
                     <div className="flex items-center md:hidden">
-                        <button onClick={() => setIsSidebarOpen(true)} className="text-slate-500 hover:text-slate-700 p-2">
+                        <button onClick={() => setIsSidebarOpen(true)} className="text-secondary hover:text-primary p-2 transition-colors">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                         </button>
-                        <span className="ml-2 font-bold text-lg text-slate-800">PharmaNestHub</span>
+                        <span className="ml-3 font-bold text-lg text-primary tracking-wide">PharmaNestHub</span>
                     </div>
 
                     <div className="flex items-center space-x-6">
-                        <Link to="/profile" className="flex items-center text-gray-600 hover:text-teal-600 transition-colors font-medium">
-                            <span className="mr-2 hidden md:inline">{currentUser?.displayName || 'Profile'}</span>
-                            {currentUser?.photoURL ? (
-                                <img src={currentUser.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-gray-200" />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
-                                    {currentUser?.email?.charAt(0).toUpperCase()}
-                                </div>
-                            )}
+                        <ThemeToggle />
+
+                        <div className="w-px h-8 bg-white/10 hidden md:block"></div>
+
+                        <Link to="/profile" className="flex items-center group">
+                            <div className="text-right mr-3 hidden md:block">
+                                <div className="text-sm font-semibold text-primary group-hover:text-indigo-400 transition-colors">{currentUser?.displayName || 'User'}</div>
+                                <div className="text-xs text-secondary">{currentUser?.email}</div>
+                            </div>
+                            <div className="relative">
+                                {currentUser?.photoURL ? (
+                                    <img src={currentUser.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-indigo-500/30 group-hover:border-indigo-400 transition-colors object-cover" />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white border-2 border-indigo-500/30 shadow-lg shadow-indigo-500/20">
+                                        {currentUser?.email?.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
+                            </div>
                         </Link>
+                        <div className="w-px h-8 bg-white/10 mx-2"></div>
                         <button
                             onClick={() => auth.signOut()}
-                            className="text-gray-500 hover:text-red-500 transition-colors font-medium text-sm"
+                            className="text-secondary hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10"
+                            title="Sign Out"
                         >
-                            Sign Out
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
                     </div>
                 </header>
 
-                <div className="p-4 md:p-8 max-w-7xl mx-auto">
+                <div className="p-4 md:p-10 max-w-7xl mx-auto">
                     {activeView === 'create_group' && currentUser?.email === 'tandelvansh0511@gmail.com' ? (
                         <div className="max-w-2xl mx-auto animate-fade-in-up">
-                            <h2 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                                <span className="p-3 bg-teal-100 text-teal-600 rounded-2xl">
+                            <h2 className="text-3xl font-bold text-primary mb-8 flex items-center gap-4">
+                                <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
                                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                                </span>
+                                </div>
                                 Create New Group
                             </h2>
-                            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+                            <div className="glass-card p-8 shadow-2xl shadow-black/20">
                                 <form onSubmit={createGroup} className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Group Name</label>
+                                        <label className="block text-sm font-semibold text-secondary mb-2 uppercase tracking-wider">Group Name</label>
                                         <input
                                             type="text"
                                             value={newGroupName}
                                             onChange={(e) => setNewGroupName(e.target.value)}
                                             placeholder="e.g. Project Alpha"
-                                            className="w-full px-4 py-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium"
+                                            className="input-field w-full"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
+                                        <label className="block text-sm font-semibold text-secondary mb-2 uppercase tracking-wider">Description</label>
                                         <textarea
                                             value={newGroupDescription}
                                             onChange={(e) => setNewGroupDescription(e.target.value)}
                                             placeholder="What is this group for?"
-                                            className="w-full px-4 py-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium resize-none h-32"
+                                            className="input-field w-full resize-none h-32"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Target Year</label>
+                                        <label className="block text-sm font-semibold text-secondary mb-2 uppercase tracking-wider">Target Year</label>
                                         <input
                                             type="text"
                                             value={newGroupYear}
                                             onChange={(e) => setNewGroupYear(e.target.value)}
                                             placeholder="e.g. 1st Year, 2024"
-                                            className="w-full px-4 py-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium"
+                                            className="input-field w-full"
                                         />
                                     </div>
                                     <button
                                         type="submit"
                                         disabled={isCreating}
-                                        className={`w-full py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 transition-all duration-200 flex items-center justify-center ${isCreating ? 'opacity-75 cursor-not-allowed' : 'hover:shadow-teal-500/50 hover:scale-[1.02] active:scale-[0.98]'}`}
+                                        className={`w-full btn-primary flex items-center justify-center py-4 text-lg ${isCreating ? 'opacity-75 cursor-not-allowed' : ''}`}
                                     >
                                         {isCreating ? (
                                             <>
@@ -260,53 +278,67 @@ const Dashboard = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="mb-10">
-                                <h2 className="text-3xl font-black text-slate-900 mb-2">My Groups</h2>
-                                <p className="text-slate-500">Access and manage your secure document groups.</p>
+                            <div className="mb-10 animate-fade-in-down">
+                                <h2 className="text-4xl font-bold text-primary mb-2 tracking-tight">My Groups</h2>
+                                <p className="text-secondary text-lg">Access and manage your secure document groups.</p>
                             </div>
 
                             {loading ? (
-                                <div className="flex justify-center py-20">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+                                <div className="flex justify-center py-32">
+                                    <div className="relative">
+                                        <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-6 h-6 bg-indigo-500 rounded-full opacity-20 animate-pulse"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {groups.map((group) => (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {groups.map((group, index) => (
                                         <Link
                                             key={group.id}
                                             to={`/group/${group.id}`}
-                                            className="group block relative bg-white p-6 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 border border-slate-100 transition-all duration-300 transform hover:-translate-y-1"
+                                            className="glass-card p-6 group block relative hover:-translate-y-2 anim-delay"
+                                            style={{ animationDelay: `${index * 50}ms` }}
                                         >
-                                            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 text-2xl font-black group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm">
-                                                {group.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <h4 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors truncate">{group.name}</h4>
-                                            <p className="text-sm text-slate-500 line-clamp-2 mb-6 h-10">{group.description}</p>
+                                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                                            <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
-                                                <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                                                    {group.members ? group.members.length : 1} Members
-                                                </span>
-                                                {/* Delete Button (Admin Only) */}
-                                                {currentUser?.email === 'tandelvansh0511@gmail.com' && (
-                                                    <button
-                                                        onClick={(e) => deleteGroup(group.id, e)}
-                                                        className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                        title="Delete Group"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    </button>
-                                                )}
+                                            <div className="relative">
+                                                <div className="flex justify-between items-start mb-6">
+                                                    <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
+                                                        {group.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    {group.isNew && <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/30">NEW</span>}
+                                                </div>
+
+                                                <h4 className="text-xl font-bold text-primary mb-2 group-hover:text-indigo-400 transition-colors truncate">{group.name}</h4>
+                                                <p className="text-sm text-secondary line-clamp-2 mb-6 h-10 leading-relaxed">{group.description}</p>
+
+                                                <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm">
+                                                    <span className="flex items-center gap-2 text-secondary bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                                                        <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                                        {group.members ? group.members.length : 1}
+                                                    </span>
+                                                    {currentUser?.email === 'tandelvansh0511@gmail.com' && (
+                                                        <button
+                                                            onClick={(e) => deleteGroup(group.id, e)}
+                                                            className="text-slate-500 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-lg transition-colors z-20 relative"
+                                                            title="Delete Group"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </Link>
                                     ))}
                                     {groups.length === 0 && (
-                                        <div className="col-span-full py-20 text-center">
-                                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                        <div className="col-span-full py-32 text-center glass-panel rounded-3xl border-dashed border-2 border-slate-700/50">
+                                            <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <svg className="w-12 h-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                                             </div>
-                                            <h3 className="text-lg font-bold text-slate-900">No groups found</h3>
-                                            <p className="text-slate-500">You haven't joined any groups yet.</p>
+                                            <h3 className="text-xl font-bold text-primary mb-2">No groups found</h3>
+                                            <p className="text-secondary max-w-sm mx-auto">You haven't joined any groups yet. Ask an admin for an invite link.</p>
                                         </div>
                                     )}
                                 </div>

@@ -3,6 +3,8 @@ import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import React from 'react';
+import ThemeToggle from '../components/ThemeToggle';
+
 const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -21,51 +23,76 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 p-4">
-            <div className="bg-white/90 backdrop-blur-lg border border-white/20 shadow-2xl p-8 rounded-2xl w-full max-w-md relative overflow-hidden">
-                {/* Decorative background blobs */}
-                <div className="absolute bottom-full left-0 mb-[-10%] ml-[-10%] w-32 h-32 bg-teal-300 rounded-full blur-2xl opacity-20"></div>
-                <div className="absolute top-full right-0 mt-[-10%] mr-[-10%] w-32 h-32 bg-violet-500 rounded-full blur-2xl opacity-20"></div>
+        <div className="min-h-screen flex items-center justify-center bg-main px-4 relative overflow-hidden transition-colors duration-300">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 opacity-50 dark:opacity-100 transition-opacity">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-slow"></div>
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+            </div>
+
+            {/* Theme Toggle */}
+            <div className="absolute top-6 right-6 z-50">
+                <ThemeToggle />
+            </div>
+
+            <div className="glass-card p-10 rounded-3xl w-full max-w-md relative hover:-translate-y-0 hover:shadow-2xl transition-all duration-500">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-[100px] -z-10"></div>
 
                 <div className="relative z-10">
-                    <h2 className="text-3xl font-bold mb-2 text-gray-800 text-center">Create Account</h2>
-                    <p className="text-gray-500 text-center mb-8">Join to start sharing securely</p>
+                    <div className="text-center mb-10">
+                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-500/20">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        </div>
+                        <h2 className="text-3xl font-bold text-primary mb-2 tracking-tight">Create Account</h2>
+                        <p className="text-secondary">Join to start sharing securely</p>
+                    </div>
 
-                    {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm border border-red-100">{error}</div>}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 text-sm flex items-center gap-3">
+                            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {error}
+                        </div>
+                    )}
 
-                    <form onSubmit={handleRegister} className="space-y-4">
-                        <div>
+                    <form onSubmit={handleRegister} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-secondary uppercase tracking-wider ml-1">Email</label>
                             <input
                                 type="email"
-                                placeholder="Email Address"
+                                placeholder="name@company.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all duration-200 outline-none"
+                                className="input-field w-full px-4 py-3.5"
                             />
                         </div>
-                        <div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-secondary uppercase tracking-wider ml-1">Password</label>
                             <input
                                 type="password"
-                                placeholder="Password"
+                                placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all duration-200 outline-none"
+                                className="input-field w-full px-4 py-3.5"
                             />
                         </div>
-                        <button
-                            type="submit"
-                            className="w-full mt-2 px-4 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-medium rounded-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                        >
-                            Create Account
-                        </button>
+
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                className="btn-primary w-full py-3.5 text-base shadow-lg shadow-indigo-500/25"
+                            >
+                                Create Account
+                            </button>
+                        </div>
                     </form>
 
-                    <div className="my-6 flex items-center">
-                        <div className="flex-1 border-t border-gray-200"></div>
-                        <span className="px-4 text-sm text-gray-400 font-medium">OR</span>
-                        <div className="flex-1 border-t border-gray-200"></div>
+                    <div className="my-8 flex items-center gap-4">
+                        <div className="flex-1 h-px bg-white/10"></div>
+                        <span className="text-xs font-bold text-secondary uppercase tracking-wider">Or continue with</span>
+                        <div className="flex-1 h-px bg-white/10"></div>
                     </div>
 
                     <button
@@ -77,23 +104,26 @@ const Register = () => {
                                 setError('Failed to google login. ' + err.message);
                             }
                         }}
-                        className="w-full px-4 py-3 bg-white text-gray-700 font-medium rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg group"
                     >
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-                        Continue with Google
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <span>Google</span>
                     </button>
 
-                    <div className="mt-6 text-center text-sm text-gray-600">
+                    <p className="mt-8 text-center text-sm text-secondary">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-teal-600 font-semibold hover:text-teal-700 hover:underline">
-                            Login
+                        <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300 hover:underline transition-colors">
+                            Sign In
                         </Link>
-                    </div>
+                    </p>
                 </div>
+            </div>
+
+            <div className="fixed bottom-6 text-xs text-secondary font-medium">
+                © {new Date().getFullYear()} PDF Secure. All rights reserved.
             </div>
         </div>
     );
-
 };
 
 export default Register;

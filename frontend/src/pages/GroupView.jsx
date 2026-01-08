@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import React from 'react';
 import logo from '../assets/logo.jpg';
+import ThemeToggle from '../components/ThemeToggle';
 
 const GroupView = () => {
     const { groupId } = useParams();
@@ -180,224 +181,194 @@ const GroupView = () => {
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
-            case 'owner': return 'bg-amber-100 text-amber-700 border-amber-200';
-            case 'admin': return 'bg-purple-100 text-purple-700 border-purple-200';
-            default: return 'bg-slate-100 text-slate-600 border-slate-200';
+            case 'owner': return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+            case 'admin': return 'bg-purple-500/10 text-purple-300 border-purple-500/20';
+            default: return 'bg-slate-800/50 text-slate-400 border-slate-700/50';
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 relative overflow-hidden font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
-            {/* Ambient Animated Background */}
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50vh] h-[50vh] bg-purple-500/10 rounded-full blur-[100px] animate-float"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50vh] h-[50vh] bg-indigo-500/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }}></div>
-                <div className="absolute top-[30%] right-[20%] w-[30vh] h-[30vh] bg-teal-400/10 rounded-full blur-[80px] animate-pulse-slow"></div>
+        <div className="min-h-screen bg-main flex flex-col relative overflow-hidden text-primary selection:bg-indigo-500/30 transition-colors duration-300">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 opacity-50 dark:opacity-100 transition-opacity">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
             </div>
 
             {/* Navbar */}
-            <nav className="bg-white/70 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 transition-all duration-300 shadow-sm">
-                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between h-auto md:h-20 py-4 md:py-0 items-center gap-4">
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <Link to="/dashboard" className="p-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 transition-all active:scale-95">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                            </Link>
-                            <div className="h-8 w-px bg-slate-200/60 hidden md:block"></div>
-                            <div className="flex items-center gap-3 overflow-hidden">
-                                <img src={logo} alt="Logo" className="w-12 h-12 rounded-xl object-cover shadow-lg shadow-indigo-500/20 shrink-0" />
-                                <div className="min-w-0">
-                                    <h1 className="text-lg font-bold text-slate-900 leading-tight truncate">
-                                        {group?.name || 'Loading...'}
-                                    </h1>
-                                    {group?.creatorName && (
-                                        <p className="text-xs font-medium text-slate-500 flex items-center gap-1 truncate">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
-                                            by {group.creatorName}
-                                        </p>
-                                    )}
-                                </div>
+            <nav className="glass-panel sticky top-0 z-50 border-x-0 border-t-0 border-b border-white/5 h-20">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <Link to="/dashboard" className="p-2 -ml-2 text-secondary hover:text-primary transition-colors hover:bg-white/5 rounded-xl">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        </Link>
+
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-indigo-500 blur opacity-40 rounded-xl"></div>
+                                <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-lg relative z-10 border border-white/10" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-bold text-primary leading-tight">{group?.name || 'Loading...'}</h1>
+                                {group?.creatorName && (
+                                    <p className="text-xs text-secondary font-medium">by {group.creatorName}</p>
+                                )}
                             </div>
                         </div>
+                    </div>
 
-                        {/* Top Action Bar */}
-                        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                            {/* Members Toggle Button (Admin Only) */}
-                            {isAdmin && (
+                    {/* Actions */}
+                    <div className="flex items-center gap-3">
+                        <ThemeToggle />
+
+                        {isAdmin && (
+                            <button
+                                onClick={() => setShowMembers(!showMembers)}
+                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${showMembers ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-secondary hover:bg-white/10'}`}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <span>Members</span>
+                                <span className="bg-black/20 px-1.5 py-0.5 rounded text-xs ml-1">{members.length}</span>
+                            </button>
+                        )}
+
+                        {isAdmin && (
+                            <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/5">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="365"
+                                    value={inviteDuration}
+                                    onChange={(e) => setInviteDuration(e.target.value)}
+                                    className="w-12 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
+                                />
+                                <span className="text-xs text-secondary font-medium pr-2">days</span>
                                 <button
-                                    onClick={() => setShowMembers(!showMembers)}
-                                    className={`px-4 py-2 text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 ${showMembers
-                                        ? 'bg-indigo-600 text-white shadow-indigo-500/25'
-                                        : 'bg-white/50 backdrop-blur-sm text-slate-700 hover:bg-white border border-slate-200'
-                                        }`}
+                                    onClick={generateInvite}
+                                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-md shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                    </svg>
-                                    <span className="hidden sm:inline">Members</span>
-                                    <span className="bg-white/20 text-xs px-1.5 py-0.5 rounded-md font-bold">
-                                        {members.length}
-                                    </span>
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                    Invite
                                 </button>
-                            )}
+                            </div>
+                        )}
 
-                            {isAdmin && (
-                                <>
-                                    <div className="flex items-center bg-white/50 backdrop-blur-sm rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
-                                        <span className="text-[10px] md:text-xs font-bold text-slate-400 mr-2 uppercase tracking-wider">Validity</span>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            max="365"
-                                            value={inviteDuration}
-                                            onChange={(e) => setInviteDuration(e.target.value)}
-                                            className="w-10 md:w-12 bg-transparent text-sm font-bold text-slate-800 outline-none text-center border-b-2 border-transparent focus:border-indigo-500 transition-colors"
-                                        />
-                                        <span className="ml-1 text-xs font-medium text-slate-500">days</span>
-                                    </div>
-                                    <button
-                                        onClick={generateInvite}
-                                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-900/10 hover:shadow-slate-900/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 group whitespace-nowrap"
-                                    >
-                                        <svg className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                                        <span className="hidden sm:inline">New Link</span>
-                                        <span className="sm:hidden">Invite</span>
-                                    </button>
-                                </>
-                            )}
-
-                            {/* Delete Group Button (Admin Only) */}
-                            {currentUser?.email === 'tandelvansh0511@gmail.com' && (
-                                <button
-                                    onClick={deleteGroup}
-                                    className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-sm font-bold rounded-xl transition-all border border-red-100 flex items-center gap-2"
-                                    title="Delete Group"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    <span className="hidden sm:inline">Delete</span>
-                                </button>
-                            )}
-                        </div>
+                        {currentUser?.email === 'tandelvansh0511@gmail.com' && (
+                            <button
+                                onClick={deleteGroup}
+                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
+                                title="Delete Group"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        )}
                     </div>
                 </div>
             </nav>
 
-            <main className="max-w-[1800px] mx-auto p-4 sm:p-6 lg:p-8 animate-fade-in-up">
-                {/* Invite Link Notification Overlay */}
+            <div className="max-w-7xl mx-auto p-4 md:p-8 w-full animate-fade-in-up">
+                {/* Invite Notification */}
                 {inviteLink && (
                     <div className="mb-8 animate-fade-in-down">
-                        <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-100 p-4 md:p-5 rounded-2xl shadow-xl shadow-teal-500/5 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 w-full md:w-auto">
-                                <div className="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        <div className="glass-panel p-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-white">Invite Link Created</h3>
+                                        <p className="text-sm text-secondary">Valid for <span className="text-emerald-400 font-bold">{inviteDuration} days</span></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-base font-bold text-teal-900">Unique Invite Created</h3>
-                                    <p className="text-sm text-teal-700/80 font-medium">This link is valid for <span className="font-bold underline Decoration-teal-500/50">{inviteDuration} days</span>.</p>
+                                <div className="flex w-full md:w-auto bg-black/20 rounded-xl p-1 border border-white/5">
+                                    <code className="flex-1 md:flex-none px-3 py-2 text-xs font-mono text-emerald-300 truncate max-w-[200px] md:max-w-xs bg-transparent">
+                                        {inviteLink}
+                                    </code>
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(inviteLink); alert('Copied!') }}
+                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors"
+                                    >
+                                        Copy
+                                    </button>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-2 w-full md:w-auto bg-white p-1 rounded-xl border border-teal-200 shadow-sm">
-                                <code className="flex-1 md:flex-none py-2 px-3 bg-transparent text-xs font-mono text-teal-800 break-all md:break-normal truncate max-w-[200px] md:max-w-xs">
-                                    {inviteLink}
-                                </code>
-                                <button
-                                    onClick={() => { navigator.clipboard.writeText(inviteLink); alert('Copied!') }}
-                                    className="p-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-sm transition-colors font-bold text-xs shrink-0"
-                                >
-                                    Copy
-                                </button>
                             </div>
                         </div>
                     </div>
                 )}
 
                 <div className={`grid grid-cols-1 gap-6 lg:gap-8 ${showMembers ? 'xl:grid-cols-12' : 'xl:grid-cols-4'}`}>
-                    {/* Left Sidebar: Info & Upload */}
+                    {/* Left Sidebar */}
                     <div className={`space-y-6 ${showMembers ? 'xl:col-span-3' : 'xl:col-span-1'}`}>
-                        {/* Group Description Card */}
-                        <div className="bg-white/60 backdrop-blur-xl p-6 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/40">
-                            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                About Group
-                            </h2>
-                            <p className="text-slate-600 leading-relaxed font-medium">
-                                {group?.description || 'No description available for this group.'}
-                            </p>
+                        {/* Info Card */}
+                        <div className="glass-card p-6">
+                            <h2 className="text-xs font-bold text-secondary uppercase tracking-widest mb-4">About Group</h2>
+                            <p className="text-primary text-sm leading-relaxed">{group?.description || 'No description available.'}</p>
 
                             {group?.year && (
-                                <div className="mt-4 flex items-center gap-2">
-                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                <div className="mt-4">
+                                    <span className="inline-block px-2 py-1 bg-white/5 border border-white/10 rounded text-xs font-medium text-secondary">
                                         {group.year}
                                     </span>
                                 </div>
                             )}
 
-                            {/* Membership Countdown */}
+                            {/* Countdown */}
                             {expiry && !isAdmin && (
-                                <div className="mt-8 relative overflow-hidden group rounded-2xl">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-100 transition-opacity"></div>
-                                    <div className="relative p-5 text-white">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-bold opacity-80 uppercase tracking-wider">Access Time</span>
-                                            <svg className="w-5 h-5 opacity-80 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        </div>
-                                        <div className="text-3xl font-black tracking-tight font-mono">
-                                            {timeLeft}
-                                        </div>
-                                        <div className="mt-2 text-xs font-medium opacity-70">
-                                            Renew before it expires to keep access.
-                                        </div>
+                                <div className="mt-6 relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-indigo-500/20 p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[10px] font-bold uppercase text-indigo-300 tracking-wider">Access Expires In</span>
+                                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
                                     </div>
+                                    <div className="text-2xl font-mono font-bold text-white tracking-tight">{timeLeft}</div>
                                 </div>
                             )}
 
                             {isAdmin && (
-                                <div className="mt-8 p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Total Files</h3>
-                                        <p className="text-2xl font-black text-indigo-900">{pdfs.length}</p>
+                                <div className="mt-6 grid grid-cols-2 gap-3">
+                                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                                        <div className="text-xs text-secondary font-bold uppercase mb-1">Files</div>
+                                        <div className="text-2xl font-bold text-primary">{pdfs.length}</div>
                                     </div>
-                                    <div className="text-indigo-200">
-                                        <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path></svg>
+                                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                                        <div className="text-xs text-secondary font-bold uppercase mb-1">Members</div>
+                                        <div className="text-2xl font-bold text-primary">{members.length}</div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Upload Widget (Admin Only) */}
+                        {/* Upload Card */}
                         {isAdmin && (
-                            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-50 to-transparent rounded-bl-[100px] -z-0 group-hover:scale-110 transition-transform duration-500"></div>
-                                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2 relative z-10">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    </div>
-                                    Upload File
+                            <div className="glass-card p-6 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-full -z-10"></div>
+                                <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
+                                    <span className="p-1.5 bg-indigo-600 rounded-lg">
+                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    </span>
+                                    Upload Document
                                 </h3>
-                                <form onSubmit={handleUpload} className="space-y-4 relative z-10">
-                                    <div>
-                                        <input
-                                            type="text"
-                                            value={title}
-                                            onChange={e => setTitle(e.target.value)}
-                                            required
-                                            placeholder="Document Title"
-                                            className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm"
-                                        />
-                                    </div>
-                                    <label className="block w-full cursor-pointer group/file">
-                                        <div className="w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-slate-50/50 group-hover/file:bg-indigo-50/50 group-hover/file:border-indigo-400 transition-all duration-300 relative overflow-hidden">
+                                <form onSubmit={handleUpload} className="space-y-4">
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={e => setTitle(e.target.value)}
+                                        required
+                                        placeholder="Document Title"
+                                        className="input-field w-full"
+                                    />
+                                    <label className="block w-full cursor-pointer group">
+                                        <div className="w-full h-24 border-2 border-dashed border-slate-700/50 rounded-xl flex flex-col items-center justify-center bg-white/5 group-hover:bg-white/10 group-hover:border-indigo-500/50 transition-all">
                                             {file ? (
-                                                <div className="text-center px-4 relative z-10">
-                                                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm">
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                <div className="text-center px-4">
+                                                    <div className="text-green-400 mb-1">
+                                                        <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                                                     </div>
-                                                    <p className="text-xs font-bold text-slate-700 truncate max-w-[150px]">{file.name}</p>
+                                                    <p className="text-xs font-bold text-primary truncate max-w-[150px]">{file.name}</p>
                                                 </div>
                                             ) : (
-                                                <div className="text-center relative z-10">
-                                                    <svg className="w-8 h-8 text-slate-400 mb-2 mx-auto group-hover/file:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                                    <p className="text-xs font-bold text-slate-500 group-hover/file:text-indigo-600 transition-colors">Choose PDF</p>
+                                                <div className="text-center text-secondary group-hover:text-indigo-400 transition-colors">
+                                                    <span className="text-xs font-bold">Choose PDF</span>
                                                 </div>
                                             )}
                                         </div>
@@ -406,166 +377,110 @@ const GroupView = () => {
                                     <button
                                         type="submit"
                                         disabled={uploading}
-                                        className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+                                        className="w-full btn-primary py-3 text-sm flex items-center justify-center disabled:opacity-50"
                                     >
-                                        {uploading ? 'Processing...' : 'Upload Now'}
+                                        {uploading ? 'Uploading...' : 'Upload Securely'}
                                     </button>
                                 </form>
                             </div>
                         )}
                     </div>
 
-                    {/* Middle Content: Files Grid */}
+                    {/* Main Content: Files */}
                     <div className={showMembers ? 'xl:col-span-6' : 'xl:col-span-3'}>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                                <span className="w-2 h-8 bg-indigo-600 rounded-full"></span>
-                                Secure Documents
-                            </h2>
+                        <div className="mb-6 flex items-center gap-3">
+                            <h2 className="text-2xl font-bold text-primary">Secure Documents</h2>
+                            <div className="h-px flex-1 bg-white/5"></div>
                         </div>
 
                         {pdfs.length > 0 ? (
-                            <div className={`grid grid-cols-1 gap-5 ${showMembers ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+                            <div className={`grid grid-cols-1 gap-4 ${showMembers ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                                 {pdfs.map((pdf, index) => (
                                     <div
                                         key={pdf.id}
-                                        className="group relative bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-12px_rgba(99,102,241,0.2)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
+                                        className="glass-card p-5 group flex flex-col h-full hover:-translate-y-1 anim-delay"
                                         style={{ animationDelay: `${index * 50}ms` }}
                                     >
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition-all duration-300 shadow-sm">
-                                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path></svg>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path></svg>
                                             </div>
-                                            {/* External link removed for security */}
-                                            <div className="p-2 text-slate-200" title="Protected">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex-1 mb-6">
-                                            <h3 className="font-bold text-slate-900 text-lg leading-snug mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2" title={pdf.title}>
-                                                {pdf.title}
-                                            </h3>
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-                                                <span className="px-2 py-0.5 bg-slate-100 rounded text-slate-500">PDF</span>
-                                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                                <span>{new Date(pdf.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                            <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded bg-white/5 text-secondary border border-white/5">
+                                                {new Date(pdf.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                             </div>
                                         </div>
 
-                                        <Link
-                                            to={`/view/${groupId}/${pdf.id}`}
-                                            className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl flex items-center justify-center gap-2 group-hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-900/10 group-hover:shadow-indigo-500/30 text-sm"
-                                        >
-                                            <span>View Document</span>
-                                            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                        </Link>
+                                        <h3 className="font-bold text-primary text-lg mb-2 line-clamp-2 group-hover:text-indigo-400 transition-colors">
+                                            {pdf.title}
+                                        </h3>
+
+                                        <div className="mt-auto pt-4">
+                                            <Link
+                                                to={`/view/${groupId}/${pdf.id}`}
+                                                className="w-full py-2.5 bg-white/5 hover:bg-indigo-600 text-secondary hover:text-white font-semibold rounded-lg text-sm flex items-center justify-center gap-2 transition-all group/btn border border-white/5 hover:border-indigo-500/50"
+                                            >
+                                                <span>View Securely</span>
+                                                <svg className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                            </Link>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-20 px-4 bg-white/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200 hover:border-indigo-200 transition-colors">
-                                <div className="w-20 h-20 bg-gradient-to-tr from-slate-100 to-slate-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
-                                    <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z"></path></svg>
+                            <div className="glass-panel rounded-3xl p-12 text-center border-dashed border-2 border-slate-700/50">
+                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary">
+                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-900 mb-2">No documents yet</h3>
-                                <p className="text-slate-500 text-center max-w-sm mb-6 text-sm">This group doesn't have any secure files shared yet.</p>
-                                {isAdmin && (
-                                    <div className="text-indigo-600 font-bold text-xs bg-indigo-50 px-4 py-2 rounded-lg animate-pulse">
-                                        Use the upload panel to add files
-                                    </div>
-                                )}
+                                <h3 className="text-lg font-bold text-primary mb-2">No documents yet</h3>
+                                <p className="text-secondary text-sm">This group doesn't have any secure files shared yet.</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Right Sidebar: Members Panel */}
+                    {/* Members List */}
                     {showMembers && (
                         <div className="xl:col-span-3">
-                            <div className="bg-white/60 backdrop-blur-xl p-6 rounded-3xl border border-white/60 shadow-xl shadow-slate-200/40 sticky top-28">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                        </svg>
-                                        Group Members
-                                    </h2>
-                                    <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">
-                                        {members.length}
-                                    </span>
+                            <div className="glass-panel rounded-2xl p-4 sticky top-28 max-h-[calc(100vh-140px)] flex flex-col">
+                                <div className="flex items-center justify-between mb-4 px-2">
+                                    <h3 className="text-xs font-bold text-secondary uppercase tracking-wider">Members</h3>
+                                    <span className="text-xs font-bold text-primary bg-white/10 px-2 py-0.5 rounded">{members.length}</span>
                                 </div>
 
-                                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                                <div className="overflow-y-auto space-y-2 pr-2 custom-scrollbar flex-1">
                                     {members.map((member) => (
-                                        <div
-                                            key={member.uid}
-                                            className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all group"
-                                        >
-                                            {/* Avatar */}
-                                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                                        <div key={member.uid} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group">
+                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                                                 {member.photoUrl ? (
-                                                    <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
+                                                    <img src={member.photoUrl} alt={member.name} className="w-full h-full rounded-lg object-cover" />
                                                 ) : (
                                                     member.name?.charAt(0).toUpperCase() || '?'
                                                 )}
                                             </div>
-
-                                            {/* Info */}
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-bold text-slate-900 text-sm truncate">
-                                                        {member.name}
-                                                    </p>
-                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase ${getRoleBadgeColor(member.role)}`}>
-                                                        {member.role}
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-sm font-semibold text-primary truncate">{member.name}</p>
+                                                    <span className={`text-[10px] font-bold px-1.5 rounded border uppercase ${getRoleBadgeColor(member.role)}`}>
+                                                        {member.role === 'owner' ? 'Own' : member.role === 'admin' ? 'Adm' : 'Mem'}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 truncate">
-                                                    {member.email}
-                                                </p>
-                                                {member.expiryDate && (
-                                                    <p className="text-[10px] text-amber-600 font-medium mt-0.5">
-                                                        Expires: {new Date(member.expiryDate).toLocaleDateString()}
-                                                    </p>
-                                                )}
+                                                <p className="text-[10px] text-secondary truncate">{member.email}</p>
                                             </div>
-
-                                            {/* Remove Button (Admin only, not for owner) */}
                                             {isAdmin && member.role !== 'owner' && (
                                                 <button
                                                     onClick={() => handleRemoveMember(member.uid)}
-                                                    disabled={removingMember === member.uid}
-                                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                                                    title="Remove member"
+                                                    className="text-secondary hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    {removingMember === member.uid ? (
-                                                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                                        </svg>
-                                                    ) : (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                        </svg>
-                                                    )}
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                 </button>
                                             )}
                                         </div>
                                     ))}
-
-                                    {members.length === 0 && (
-                                        <div className="text-center py-8 text-slate-400">
-                                            <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            <p className="text-sm font-medium">No members found</p>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
-            </main>
+            </div>
         </div>
     );
 };

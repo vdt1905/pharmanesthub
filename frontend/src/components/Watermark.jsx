@@ -15,9 +15,10 @@ import React, { useState, useEffect, useMemo } from 'react';
  * - Updates timestamp every minute
  * - SVG-based for crispness at any resolution
  */
-const Watermark = ({ 
-    userEmail = 'user@example.com', 
+const Watermark = ({
+    userEmail = 'user@example.com',
     sessionId = 'unknown',
+    text = null,
     opacity = 0.15,  // 15% opacity by default
     fontSize = 14,
     color = '#000000',
@@ -58,7 +59,7 @@ const Watermark = ({
     }, [sessionId]);
 
     // Watermark text content
-    const watermarkText = `${userEmail} • ID:${shortSessionId} • ${timestamp}`;
+    const watermarkText = text || `${userEmail} • ID:${shortSessionId} • ${timestamp}`;
 
     // Create SVG pattern for tiled watermark
     const patternId = useMemo(() => `watermark-pattern-${Math.random().toString(36).slice(2)}`, []);
@@ -93,13 +94,13 @@ const Watermark = ({
                     <pattern
                         id={patternId}
                         patternUnits="userSpaceOnUse"
-                        width="400"
-                        height="200"
+                        width="800"
+                        height="400"
                         patternTransform="rotate(-30)"
                     >
                         <text
-                            x="10"
-                            y="30"
+                            x="50"
+                            y="100"
                             fill={color}
                             fillOpacity={opacity}
                             fontSize={fontSize}
@@ -109,8 +110,8 @@ const Watermark = ({
                             {watermarkText}
                         </text>
                         <text
-                            x="200"
-                            y="130"
+                            x="450"
+                            y="300"
                             fill={color}
                             fillOpacity={opacity}
                             fontSize={fontSize}
