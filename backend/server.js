@@ -46,6 +46,7 @@ app.use(cors({
     origin: [
         "https://secure-pdf-viewer-frontend.vercel.app",
         "https://pdf-secure-r528-frontend-last.vercel.app",
+        "https://pharmanesthub.in",
         "http://localhost:5173"
     ],
     credentials: true
