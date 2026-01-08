@@ -12,6 +12,7 @@ app.use((req, res, next) => {
     const allowedOrigins = [
         "https://secure-pdf-viewer-frontend.vercel.app",
         "https://pdf-secure-r528-frontend-last.vercel.app",
+        "https://pharmanesthub.vercel.app",
         "http://localhost:5173"
     ];
 
