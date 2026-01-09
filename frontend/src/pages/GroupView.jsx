@@ -26,11 +26,13 @@ const GroupView = () => {
     const [members, setMembers] = useState([]);
     const [showMembers, setShowMembers] = useState(false);
     const [removingMember, setRemovingMember] = useState(null);
+    const [initialLoading, setInitialLoading] = useState(true);
 
     useEffect(() => {
         if (currentUser) {
-            fetchGroupData();
-            fetchMembers();
+            Promise.all([fetchGroupData(), fetchMembers()]).finally(() => {
+                setInitialLoading(false);
+            });
         }
     }, [groupId, currentUser]);
 
@@ -186,6 +188,29 @@ const GroupView = () => {
             default: return 'bg-slate-800/50 text-slate-400 border-slate-700/50';
         }
     };
+
+    if (initialLoading) {
+        return (
+            <div className="min-h-screen bg-main flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-300">
+                {/* Ambient Background */}
+                <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 opacity-50 dark:opacity-100 transition-opacity">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+                </div>
+
+                <div className="flex flex-col items-center gap-6 animate-fade-in-up">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full animate-pulse-slow"></div>
+                        <img src={logo} alt="Logo" className="w-20 h-20 rounded-2xl object-cover shadow-2xl relative z-10 border border-white/10" />
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-3 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+                        <h2 className="text-xl font-bold text-primary tracking-tight">Loading Group Data...</h2>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-main flex flex-col relative overflow-hidden text-primary selection:bg-indigo-500/30 transition-colors duration-300">
