@@ -330,7 +330,7 @@ const GroupView = () => {
                             </div>
                         )}
 
-                        {(currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
+                        {(currentUser?.email === 'pharmanesthub@gmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => navigate('/dashboard', { state: { editGroup: group } })}

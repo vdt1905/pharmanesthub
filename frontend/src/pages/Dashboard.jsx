@@ -184,7 +184,7 @@ const Dashboard = () => {
                     </button>
 
                     {/* Add Group (Admin Only) */}
-                    {(currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
+                    {(currentUser?.email === 'pharmanesthub@gmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
                         <button
                             onClick={() => { setActiveView('create_group'); setEditingGroup(null); setNewGroupName(''); setNewGroupDescription(''); setNewGroupYear(''); setNewGroupSemester('1'); if (window.innerWidth < 768) setIsSidebarOpen(false); }}
                             className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${activeView === 'create_group' ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/20' : 'text-secondary hover:bg-white/5 hover:text-primary hover:translate-x-1'}`}
@@ -267,7 +267,7 @@ const Dashboard = () => {
                 </header>
 
                 <div className="p-4 md:p-10 max-w-7xl mx-auto">
-                    {activeView === 'create_group' && (currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') ? (
+                    {activeView === 'create_group' && (currentUser?.email === 'pharmanesthub@gmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') ? (
                         <div className="max-w-2xl mx-auto animate-fade-in-up">
                             <h2 className="text-3xl font-bold text-primary mb-8 flex items-center gap-4">
                                 <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
@@ -426,7 +426,7 @@ const Dashboard = () => {
                                                         <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                                         {group.members ? group.members.length : 1}
                                                     </span>
-                                                    {(currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
+                                                    {(currentUser?.email === 'pharmanesthub@gmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={(e) => handleEditClick(group, e)}
