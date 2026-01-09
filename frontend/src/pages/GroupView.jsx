@@ -18,12 +18,16 @@ const GroupView = () => {
     const [file, setFile] = useState(null);
     const { currentUser } = useAuth();
 
-    const [inviteDuration, setInviteDuration] = useState(30);
+    const [inviteDays, setInviteDays] = useState(0);
+    const [inviteHours, setInviteHours] = useState(1);
+    const [inviteMinutes, setInviteMinutes] = useState(0);
+
     const [expiry, setExpiry] = useState(null);
     const [timeLeft, setTimeLeft] = useState('');
     const [inviteKey, setInviteKey] = useState(0);
-    const [generatedDuration, setGeneratedDuration] = useState(null);
+    const [generatedDurationText, setGeneratedDurationText] = useState(null);
     const [generatingInvite, setGeneratingInvite] = useState(false);
+    const [showExpiryModal, setShowExpiryModal] = useState(false);
 
     // New state for members
     const [members, setMembers] = useState([]);
@@ -89,6 +93,9 @@ const GroupView = () => {
             setPdfs(pdfRes.data);
         } catch (error) {
             console.error('Error fetching data', error);
+            if (error.response?.status === 403 && error.response?.data?.message?.includes("expired")) {
+                setShowExpiryModal(true);
+            }
         }
     };
 
@@ -139,23 +146,29 @@ const GroupView = () => {
         }
     };
 
-
-
-
-
-
     const generateInvite = async () => {
         setGeneratingInvite(true);
         try {
             const token = await currentUser.getIdToken();
             const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/groups/${groupId}/invite`,
-                { durationDays: inviteDuration },
+                {
+                    days: inviteDays,
+                    hours: inviteHours,
+                    minutes: inviteMinutes
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             console.log('Invite Gen Response:', res.data);
             const link = `${window.location.origin}/join/${res.data.inviteCode}`;
             setInviteLink(link);
-            setGeneratedDuration(inviteDuration);
+
+            // Format display text
+            const parts = [];
+            if (inviteDays > 0) parts.push(`${inviteDays}d`);
+            if (inviteHours > 0) parts.push(`${inviteHours}h`);
+            if (inviteMinutes > 0) parts.push(`${inviteMinutes}m`);
+            setGeneratedDurationText(parts.join(' ') || '1 min');
+
             setInviteKey(prev => prev + 1);
         } catch (error) {
             console.error('Invite generation failed', error);
@@ -272,18 +285,44 @@ const GroupView = () => {
 
                         {isAdmin && (
                             <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/5">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="365"
-                                    value={inviteDuration}
-                                    onChange={(e) => setInviteDuration(e.target.value)}
-                                    className="w-10 md:w-12 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
-                                />
-                                <span className="text-xs text-secondary font-medium pr-1">days</span>
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="d"
+                                        value={inviteDays}
+                                        onChange={(e) => setInviteDays(parseInt(e.target.value) || 0)}
+                                        className="w-8 md:w-10 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
+                                    />
+                                    <span className="text-[10px] text-secondary font-bold">d</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="23"
+                                        placeholder="h"
+                                        value={inviteHours}
+                                        onChange={(e) => setInviteHours(parseInt(e.target.value) || 0)}
+                                        className="w-8 md:w-10 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
+                                    />
+                                    <span className="text-[10px] text-secondary font-bold">h</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        placeholder="m"
+                                        value={inviteMinutes}
+                                        onChange={(e) => setInviteMinutes(parseInt(e.target.value) || 0)}
+                                        className="w-8 md:w-10 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
+                                    />
+                                    <span className="text-[10px] text-secondary font-bold">m</span>
+                                </div>
                                 <button
                                     onClick={generateInvite}
-                                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-md shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1"
+                                    className="ml-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-md shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1"
                                 >
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                     <span>Invite</span>
@@ -292,13 +331,22 @@ const GroupView = () => {
                         )}
 
                         {(currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
-                            <button
-                                onClick={deleteGroup}
-                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
-                                title="Delete Group"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => navigate('/dashboard', { state: { editGroup: group } })}
+                                    className="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors border border-transparent hover:border-amber-500/20"
+                                    title="Edit Group"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button
+                                    onClick={deleteGroup}
+                                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
+                                    title="Delete Group"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -321,7 +369,7 @@ const GroupView = () => {
                                     <div>
                                         <h3 className="font-bold text-white">{generatingInvite ? 'Generating Link...' : 'Invite Link Created'}</h3>
                                         <p className="text-sm text-secondary">
-                                            {generatingInvite ? 'Please wait a moment' : <>Valid for <span className="text-emerald-400 font-bold">{generatedDuration} days</span></>}
+                                            {generatingInvite ? 'Please wait a moment' : <>Valid for <span className="text-emerald-400 font-bold">{generatedDurationText}</span></>}
                                         </p>
                                     </div>
                                 </div>
@@ -526,6 +574,30 @@ const GroupView = () => {
                     )}
                 </div>
             </div>
+
+            {/* Expiry Modal */}
+            {showExpiryModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                    <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-6 animate-fade-in-up">
+                        <div className="flex flex-col items-center text-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white mb-2">Membership Expired</h3>
+                                <p className="text-slate-400 text-sm">Your time in this group has ended. You have been automatically removed.</p>
+                            </div>
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/25 mt-2"
+                            >
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

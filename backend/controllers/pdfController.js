@@ -150,6 +150,12 @@ exports.getGroupPDFs = async (req, res) => {
     if (!isOwnerOrAdmin && groupData.memberExpiry && groupData.memberExpiry[uid]) {
       const expiry = new Date(groupData.memberExpiry[uid]);
       if (expiry < new Date()) {
+        const admin = require("firebase-admin");
+        await db.collection("groups").doc(groupId).update({
+          members: admin.firestore.FieldValue.arrayRemove(uid),
+          [`roles.${uid}`]: admin.firestore.FieldValue.delete(),
+          [`memberExpiry.${uid}`]: admin.firestore.FieldValue.delete()
+        });
         return res.status(403).json({ message: "Membership expired" });
       }
     }
@@ -208,6 +214,12 @@ exports.getPDFMetadata = async (req, res) => {
     if (!isOwnerOrAdmin && groupData.memberExpiry && groupData.memberExpiry[uid]) {
       const expiry = new Date(groupData.memberExpiry[uid]);
       if (expiry < new Date()) {
+        const admin = require("firebase-admin");
+        await db.collection("groups").doc(pdfData.groupId).update({
+          members: admin.firestore.FieldValue.arrayRemove(uid),
+          [`roles.${uid}`]: admin.firestore.FieldValue.delete(),
+          [`memberExpiry.${uid}`]: admin.firestore.FieldValue.delete()
+        });
         return res.status(403).json({ message: "Membership expired" });
       }
     }
@@ -260,6 +272,12 @@ exports.generateSignedUrl = async (req, res) => {
     if (!isOwnerOrAdmin && groupData.memberExpiry && groupData.memberExpiry[uid]) {
       const expiry = new Date(groupData.memberExpiry[uid]);
       if (expiry < new Date()) {
+        const admin = require("firebase-admin");
+        await db.collection("groups").doc(pdfData.groupId).update({
+          members: admin.firestore.FieldValue.arrayRemove(uid),
+          [`roles.${uid}`]: admin.firestore.FieldValue.delete(),
+          [`memberExpiry.${uid}`]: admin.firestore.FieldValue.delete()
+        });
         return res.status(403).json({ message: "Membership expired" });
       }
     }

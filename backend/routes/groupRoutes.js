@@ -19,6 +19,7 @@ router.delete('/:groupId/members/:memberId', authMiddleware, groupController.rem
 
 router.get('/:groupId/members', authMiddleware, groupController.getGroupMembers);
 router.delete('/:groupId/members/:userId', authMiddleware, groupController.removeMember);
+router.put('/:groupId', authMiddleware, groupController.updateGroup);
 router.delete('/:groupId', authMiddleware, groupController.deleteGroup);
 
 module.exports = router;

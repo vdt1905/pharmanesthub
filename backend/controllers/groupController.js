@@ -13,7 +13,8 @@ function makeInviteCode(len = 8) {
 
 exports.createGroup = async (req, res) => {
   try {
-    const { name, description, year } = req.body;
+    console.log("Create Request Body DEBUG:", req.body); // DEBUG
+    const { name, description, year, semester } = req.body;
     const { uid } = req.user;
 
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -27,6 +28,7 @@ exports.createGroup = async (req, res) => {
       name: name.trim(),
       description: description ? String(description).trim() : "",
       year: year ? String(year).trim() : "",
+      semester: semester ? String(semester).trim() : "1", // Default to 1 if not provided
       createdBy: uid,
 
       // roles map for scalability
@@ -41,6 +43,8 @@ exports.createGroup = async (req, res) => {
 
       createdAt: new Date().toISOString(),
     };
+
+    console.log("Saving Group Data DEBUG:", groupData); // DEBUG
 
     await db.collection("groups").doc(groupData.id).set(groupData);
 
@@ -61,7 +65,40 @@ exports.getUserGroups = async (req, res) => {
       .get();
 
     const groups = [];
-    snapshot.forEach((doc) => groups.push(doc.data()));
+    const now = new Date();
+
+    const updates = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      let isExpired = false;
+
+      // Check expiry
+      if (data.memberExpiry && data.memberExpiry[uid]) {
+        const expiryDate = new Date(data.memberExpiry[uid]);
+        if (expiryDate < now) {
+          isExpired = true;
+          // Schedule removal
+          updates.push(
+            db.collection("groups").doc(doc.id).update({
+              members: admin.firestore.FieldValue.arrayRemove(uid),
+              [`roles.${uid}`]: admin.firestore.FieldValue.delete(),
+              [`memberExpiry.${uid}`]: admin.firestore.FieldValue.delete()
+            })
+          );
+        }
+      }
+
+      if (!isExpired) {
+        groups.push(data);
+      }
+    });
+
+    // Execute cleanup
+    if (updates.length > 0) {
+      await Promise.all(updates);
+      console.log(`Cleaned up ${updates.length} expired memberships for user ${uid}`);
+    }
 
     res.status(200).json(groups);
   } catch (error) {
@@ -73,11 +110,34 @@ exports.getUserGroups = async (req, res) => {
 exports.getGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
+    const { uid } = req.user;
 
-    const doc = await db.collection("groups").doc(groupId).get();
-    if (!doc.exists) return res.status(404).json({ message: "Group not found" });
+    const groupRef = db.collection("groups").doc(groupId);
+    const groupDoc = await groupRef.get();
 
-    const groupData = doc.data();
+    if (!groupDoc.exists) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    const groupData = groupDoc.data();
+
+    // Enforce Expiry Check on Access
+    // Skip for owners/admins
+    const userRole = groupData.roles ? groupData.roles[uid] : null;
+    const isOwnerOrAdmin = groupData.createdBy === uid || userRole === "owner" || userRole === "admin";
+
+    if (!isOwnerOrAdmin && groupData.memberExpiry && groupData.memberExpiry[uid]) {
+      const expiryDate = new Date(groupData.memberExpiry[uid]);
+      if (expiryDate < new Date()) {
+        // Remove user immediately
+        await groupRef.update({
+          members: admin.firestore.FieldValue.arrayRemove(uid),
+          [`roles.${uid}`]: admin.firestore.FieldValue.delete(),
+          [`memberExpiry.${uid}`]: admin.firestore.FieldValue.delete()
+        });
+        return res.status(403).json({ message: "Membership expired. You have been removed from this group." });
+      }
+    }
 
     // Fetch creator details
     let creatorName = "Unknown";
@@ -118,12 +178,26 @@ exports.generateInvite = async (req, res) => {
     }
 
     const inviteCode = makeInviteCode(8);
-    const durationDays = Number(req.body?.durationDays ?? 30);
+
+    // Parse inputs
+    const days = Math.max(0, parseInt(req.body?.days || 0));
+    const hours = Math.max(0, parseInt(req.body?.hours || 0));
+    const minutes = Math.max(0, parseInt(req.body?.minutes || 0));
+
+    // Convert all to minutes
+    // Default to 1 day (1440 mins) if everything is 0
+    let totalMinutes = (days * 24 * 60) + (hours * 60) + minutes;
+    if (totalMinutes === 0 && !req.body?.durationDays) totalMinutes = 1440;
+
+    // Legacy support if just durationDays is passed
+    if (req.body?.durationDays && totalMinutes === 0) {
+      totalMinutes = Number(req.body.durationDays) * 24 * 60;
+    }
 
     const inviteData = {
       groupId,
       code: inviteCode,
-      durationDays: Number.isFinite(durationDays) ? Math.max(0, Math.floor(durationDays)) : 30,
+      durationMinutes: totalMinutes,
       createdBy: uid,
       createdAt: new Date().toISOString(),
       used: false,
@@ -131,7 +205,7 @@ exports.generateInvite = async (req, res) => {
 
     await db.collection("invites").doc(inviteCode).set(inviteData);
 
-    res.json({ inviteCode });
+    res.json({ inviteCode, totalMinutes });
   } catch (error) {
     console.error("Generate Invite Error:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -149,7 +223,7 @@ exports.joinGroup = async (req, res) => {
     const inviteRef = db.collection("invites").doc(inviteCode);
     const inviteDoc = await inviteRef.get();
 
-    let groupId, durationDays;
+    let groupId, durationMinutes;
     let isNewSystem = false;
 
     if (inviteDoc.exists) {
@@ -162,7 +236,12 @@ exports.joinGroup = async (req, res) => {
       }
 
       groupId = inviteData.groupId;
-      durationDays = inviteData.durationDays;
+      // Handle both new minute-based and old day-based invites
+      if (inviteData.durationMinutes !== undefined) {
+        durationMinutes = inviteData.durationMinutes;
+      } else {
+        durationMinutes = (inviteData.durationDays || 30) * 24 * 60;
+      }
       isNewSystem = true;
     } else {
       // 2) Legacy fallback
@@ -178,7 +257,8 @@ exports.joinGroup = async (req, res) => {
 
       const legacyDoc = snapshot.docs[0];
       groupId = legacyDoc.id;
-      durationDays = legacyDoc.data().inviteDuration;
+      const days = legacyDoc.data().inviteDuration || 30;
+      durationMinutes = days * 24 * 60;
     }
 
     // Fetch group
@@ -198,11 +278,11 @@ exports.joinGroup = async (req, res) => {
       [`roles.${uid}`]: "member",
     };
 
-    // Apply duration from invite used
-    const days = Number(durationDays);
-    if (Number.isFinite(days) && days > 0) {
+    // Apply duration
+    if (Number.isFinite(durationMinutes) && durationMinutes > 0) {
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + Math.floor(days));
+      // Add minutes to current time
+      expiryDate.setMinutes(expiryDate.getMinutes() + Math.floor(durationMinutes));
       updateData[`memberExpiry.${uid}`] = expiryDate.toISOString();
     }
 
@@ -329,7 +409,11 @@ exports.deleteGroup = async (req, res) => {
     const { email } = req.user;
 
     // Admin check
-    if (email !== "@pharmanesthubgmail.com") {
+    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "@pharmanesthubgmail.com"]; // Keeping the old typo one just in case it was intended as a username, but adding the real ones.
+
+    console.log("Delete Group Request by:", email); // DEBUG
+
+    if (!allowedAdmins.includes(email)) {
       return res.status(403).json({ message: "Only the administrator can delete groups." });
     }
 
@@ -338,9 +422,45 @@ exports.deleteGroup = async (req, res) => {
     // Optionally delete related invites or sub-collections here if needed
     // For now, just deleting the group document
 
+
     res.status(200).json({ message: "Group deleted successfully" });
   } catch (error) {
     console.error("Delete Group Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.updateGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { name, description, year, semester } = req.body;
+    const { email } = req.user;
+
+    // Admin check
+    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "@pharmanesthubgmail.com"];
+    if (!allowedAdmins.includes(email)) {
+      return res.status(403).json({ message: "Only the administrator can edit groups." });
+    }
+
+    const groupRef = db.collection("groups").doc(groupId);
+    const groupDoc = await groupRef.get();
+
+    if (!groupDoc.exists) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    const updateData = {
+      name: name.trim(),
+      description: description ? String(description).trim() : "",
+      year: year ? String(year).trim() : "",
+      semester: semester ? String(semester).trim() : "1",
+    };
+
+    await groupRef.update(updateData);
+
+    res.status(200).json({ message: "Group updated successfully", group: { id: groupId, ...updateData } });
+  } catch (error) {
+    console.error("Update Group Error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
