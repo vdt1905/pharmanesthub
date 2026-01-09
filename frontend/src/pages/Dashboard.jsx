@@ -182,7 +182,7 @@ const Dashboard = () => {
                         <span className="ml-3 font-bold text-lg text-primary tracking-wide">PharmaNestHub</span>
                     </div>
 
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-2 md:space-x-6">
                         <ThemeToggle />
 
                         <div className="w-px h-8 bg-white/10 hidden md:block"></div>
@@ -192,7 +192,7 @@ const Dashboard = () => {
                                 <div className="text-sm font-semibold text-primary group-hover:text-indigo-400 transition-colors">{currentUser?.displayName || 'User'}</div>
                                 <div className="text-xs text-secondary">{currentUser?.email}</div>
                             </div>
-                            <div className="relative">
+                            <div className="relative shrink-0">
                                 {currentUser?.photoURL ? (
                                     <img src={currentUser.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-indigo-500/30 group-hover:border-indigo-400 transition-colors object-cover" />
                                 ) : (
@@ -203,7 +203,7 @@ const Dashboard = () => {
                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                             </div>
                         </Link>
-                        <div className="w-px h-8 bg-white/10 mx-2"></div>
+                        <div className="w-px h-8 bg-white/10 mx-1 md:mx-2"></div>
                         <button
                             onClick={() => auth.signOut()}
                             className="text-secondary hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10"
