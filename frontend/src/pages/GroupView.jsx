@@ -21,6 +21,8 @@ const GroupView = () => {
     const [inviteDuration, setInviteDuration] = useState(30);
     const [expiry, setExpiry] = useState(null);
     const [timeLeft, setTimeLeft] = useState('');
+    const [inviteKey, setInviteKey] = useState(0);
+    const [generatedDuration, setGeneratedDuration] = useState(null);
 
     // New state for members
     const [members, setMembers] = useState([]);
@@ -146,6 +148,8 @@ const GroupView = () => {
             console.log('Invite Gen Response:', res.data);
             const link = `${window.location.origin}/join/${res.data.inviteCode}`;
             setInviteLink(link);
+            setGeneratedDuration(inviteDuration);
+            setInviteKey(prev => prev + 1);
         } catch (error) {
             console.error('Invite generation failed', error);
             alert('Failed to generate invite link');
@@ -223,62 +227,62 @@ const GroupView = () => {
             {/* Navbar */}
             <nav className="glass-panel sticky top-0 z-50 border-x-0 border-t-0 border-b border-white/5 h-20">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <Link to="/dashboard" className="p-2 -ml-2 text-secondary hover:text-primary transition-colors hover:bg-white/5 rounded-xl">
+                    <div className="flex items-center gap-2 md:gap-6 min-w-0 flex-1 mr-2">
+                        <Link to="/dashboard" className="p-2 -ml-2 text-secondary hover:text-primary transition-colors hover:bg-white/5 rounded-xl shrink-0">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         </Link>
 
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
+                        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                            <div className="relative shrink-0">
                                 <div className="absolute inset-0 bg-indigo-500 blur opacity-40 rounded-xl"></div>
                                 <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover shadow-lg relative z-10 border border-white/10" />
                             </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-primary leading-tight">{group?.name || 'Loading...'}</h1>
+                            <div className="min-w-0">
+                                <h1 className="text-lg font-bold text-primary leading-tight truncate">{group?.name || 'Loading...'}</h1>
                                 {group?.creatorName && (
-                                    <p className="text-xs text-secondary font-medium">by {group.creatorName}</p>
+                                    <p className="text-xs text-secondary font-medium truncate">by {group.creatorName}</p>
                                 )}
                             </div>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 md:gap-3">
                         <ThemeToggle />
 
                         {isAdmin && (
                             <button
                                 onClick={() => setShowMembers(!showMembers)}
-                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${showMembers ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-secondary hover:bg-white/10'}`}
+                                className={`px-2 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 md:gap-2 ${showMembers ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-secondary hover:bg-white/10'}`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                <span>Members</span>
-                                <span className="bg-black/20 px-1.5 py-0.5 rounded text-xs ml-1">{members.length}</span>
+                                <span className="hidden sm:inline">Members</span>
+                                <span className="bg-black/20 px-1.5 py-0.5 rounded-md text-xs">{members.length}</span>
                             </button>
                         )}
 
                         {isAdmin && (
-                            <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/5">
+                            <div className="flex items-center gap-1 md:gap-2 bg-white/5 rounded-lg p-0.5 md:p-1 border border-white/5">
                                 <input
                                     type="number"
                                     min="1"
                                     max="365"
                                     value={inviteDuration}
                                     onChange={(e) => setInviteDuration(e.target.value)}
-                                    className="w-12 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
+                                    className="w-8 md:w-12 bg-transparent text-center text-sm font-bold text-primary outline-none border-b-2 border-transparent focus:border-indigo-500 transition-colors"
                                 />
-                                <span className="text-xs text-secondary font-medium pr-2">days</span>
+                                <span className="text-xs text-secondary font-medium pr-1 md:pr-2 hidden sm:inline">days</span>
                                 <button
                                     onClick={generateInvite}
-                                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-md shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1"
+                                    className="px-2 md:px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-md shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1"
                                 >
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                                    Invite
+                                    <span className="hidden sm:inline">Invite</span>
                                 </button>
                             </div>
                         )}
 
-                        {currentUser?.email === '@pharmanesthubgmail.com' && (
+                        {(currentUser?.email === '@pharmanesthubgmail.com' || currentUser?.email === 'tandelvansh0511@gmail.com') && (
                             <button
                                 onClick={deleteGroup}
                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
@@ -294,7 +298,7 @@ const GroupView = () => {
             <div className="max-w-7xl mx-auto p-4 md:p-8 w-full animate-fade-in-up">
                 {/* Invite Notification */}
                 {inviteLink && (
-                    <div className="mb-8 animate-fade-in-down">
+                    <div key={inviteKey} className="mb-8 animate-fade-in-down">
                         <div className="glass-panel p-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
                                 <div className="flex items-center gap-4">
@@ -303,7 +307,7 @@ const GroupView = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-white">Invite Link Created</h3>
-                                        <p className="text-sm text-secondary">Valid for <span className="text-emerald-400 font-bold">{inviteDuration} days</span></p>
+                                        <p className="text-sm text-secondary">Valid for <span className="text-emerald-400 font-bold">{generatedDuration} days</span></p>
                                     </div>
                                 </div>
                                 <div className="flex w-full md:w-auto bg-black/20 rounded-xl p-1 border border-white/5">
