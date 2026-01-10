@@ -409,7 +409,7 @@ exports.deleteGroup = async (req, res) => {
     const { email } = req.user;
 
     // Admin check
-    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "@pharmanesthubgmail.com"]; // Keeping the old typo one just in case it was intended as a username, but adding the real ones.
+    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "pharmanesthub@gmail.com"]; // Keeping the old typo one just in case it was intended as a username, but adding the real ones.
 
     console.log("Delete Group Request by:", email); // DEBUG
 
@@ -437,7 +437,7 @@ exports.updateGroup = async (req, res) => {
     const { email } = req.user;
 
     // Admin check
-    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "@pharmanesthubgmail.com"];
+    const allowedAdmins = ["pharmanesthub@gmail.com", "tandelvansh0511@gmail.com", "pharmanesthu@bgmail.com"];
     if (!allowedAdmins.includes(email)) {
       return res.status(403).json({ message: "Only the administrator can edit groups." });
     }
