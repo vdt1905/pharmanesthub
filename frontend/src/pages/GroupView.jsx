@@ -238,6 +238,22 @@ const GroupView = () => {
         );
     }
 
+    const handleDeletePDF = async (pdfId, pdfTitle) => {
+        if (!window.confirm(`Are you sure you want to delete "${pdfTitle}"? This action cannot be undone.`)) return;
+
+        try {
+            const token = await currentUser.getIdToken();
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/pdfs/${pdfId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Update UI
+            setPdfs(prev => prev.filter(p => p.id !== pdfId));
+        } catch (error) {
+            console.error('Error deleting PDF', error);
+            alert('Failed to delete PDF');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-main flex flex-col relative overflow-hidden text-primary selection:bg-indigo-500/30 transition-colors duration-300">
             {/* Ambient Background */}
@@ -491,15 +507,29 @@ const GroupView = () => {
                                 {pdfs.map((pdf, index) => (
                                     <div
                                         key={pdf.id}
-                                        className="glass-card p-5 group flex flex-col h-full hover:-translate-y-1 anim-delay"
+                                        className="glass-card p-5 group flex flex-col h-full hover:-translate-y-1 anim-delay relative"
                                         style={{ animationDelay: `${index * 50}ms` }}
                                     >
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
                                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path></svg>
                                             </div>
-                                            <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded bg-white/5 text-secondary border border-white/5">
-                                                {new Date(pdf.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded bg-white/5 text-secondary border border-white/5">
+                                                    {new Date(pdf.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                </div>
+                                                {isAdmin && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleDeletePDF(pdf.id, pdf.title);
+                                                        }}
+                                                        className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-md transition-colors"
+                                                        title="Delete Document"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
 
